@@ -1,6 +1,6 @@
-package com.example.vlsmcalculator.domain.model
+package com.example.vlsmcalculator.ui.state
 
-data class Subnet(
+data class ResultState(
     val networkAddress: String = "",
     val firstUsableHost : String  = "",
     val lastUsableHost: String = "",

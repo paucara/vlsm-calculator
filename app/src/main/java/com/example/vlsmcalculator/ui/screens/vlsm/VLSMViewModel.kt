@@ -1,62 +1,71 @@
 package com.example.vlsmcalculator.ui.screens.vlsm
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.vlsmcalculator.domain.model.Network
+import com.example.vlsmcalculator.domain.mapper.IPMapper
+import com.example.vlsmcalculator.domain.mapper.NetworkMapper
 import com.example.vlsmcalculator.domain.usecase.CalculateVLSMUseCase
-import com.example.vlsmcalculator.ui.screens.state.CalculatorState
+import com.example.vlsmcalculator.ui.state.IPState
+import com.example.vlsmcalculator.ui.state.NetworkState
 
 class VLSMViewModel : ViewModel() {
 
     private val useCase = CalculateVLSMUseCase()
+    private val ipMapper = IPMapper()
+    private val networkMapper = NetworkMapper()
 
-    var calculatorState = mutableStateOf(CalculatorState())
-
-    var networkState : MutableState<List<Network>> = mutableStateOf(emptyList())
-
-    var uiState : MutableState<List<CalculatorState>> = mutableStateOf(emptyList())
+    var ipState = mutableStateOf(IPState())
+    var networksState : MutableState<List<NetworkState>> = mutableStateOf(emptyList())
+    var resultState : MutableState<List<IPState>> = mutableStateOf(emptyList())
 
     fun clean() {
-        calculatorState.value = CalculatorState()
-    }
-    fun update(calculatorState: CalculatorState) {
-        this.calculatorState.value = calculatorState
+        ipState.value = IPState()
+        resultState.value = emptyList()
     }
 
-    fun addNetwork(network: Network){
-        networkState.value += network
+    fun update(ipState: IPState) {
+        this.ipState.value = ipState
+    }
+
+    fun addNetwork(networkState: NetworkState){
+        this.networksState.value += networkState
     }
 
     fun updateNetworks(index : Int, requestedHosts : String){
-        val list : MutableList<Network> = networkState.value.toMutableList()
-        list[index] = list[index].copy(requestedHosts = if(requestedHosts.isNotEmpty()) requestedHosts.toLong() else 0)
-        networkState.value = list
+        val networks : MutableList<NetworkState> = networksState.value.toMutableList()
+        networks[index] = networks[index].copy(requestedHosts = requestedHosts)
+        networksState.value = networks
+    }
+
+    fun deleteNetwork(index : Int){
+        val networks : MutableList<NetworkState> = networksState.value.toMutableList()
+        networks.removeAt(index)
+        networksState.value = networks
+        check()
     }
 
     fun check() {
 
-
-
         val octets = listOf(
-            calculatorState.value.firstOctet,
-            calculatorState.value.secondOctet,
-            calculatorState.value.thirdOctet,
-            calculatorState.value.forthOctet,
-            calculatorState.value.subnetMask
+            ipState.value.firstOctet,
+            ipState.value.secondOctet,
+            ipState.value.thirdOctet,
+            ipState.value.forthOctet,
+            ipState.value.subnetMask
         )
 
-        val hosts = networkState.value.map { it.requestedHosts }
-        val hasZero = hosts.any { it == 0L }
+        val hosts = networksState.value.map { it.requestedHosts }
+        val isEmpty = hosts.any { it == "" }
 
-        if (octets.all { it.isNotEmpty() } && !hasZero) {
-            uiState.value = useCase.execute(
-                ip = calculatorState.value,
-                networks = networkState.value
+        if (octets.all { it.isNotEmpty() } && !isEmpty) {
+            resultState.value = useCase.execute(
+                ip = ipMapper.map(ipState.value),
+                networks = networksState.value.map { networkState -> networkMapper.map(networkState) }
             )
         } else {
-            uiState.value = emptyList()
+            resultState.value = emptyList()
         }
+
     }
 }

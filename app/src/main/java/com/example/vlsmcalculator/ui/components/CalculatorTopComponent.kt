@@ -12,13 +12,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
-import com.example.vlsmcalculator.ui.screens.state.CalculatorState
+import com.example.vlsmcalculator.ui.state.IPState
 
 @Composable
 fun CalculatorTopComponent(
-    uiState: CalculatorState,
+    uiState: IPState,
     clean: () -> Unit,
-    update: (CalculatorState) -> Unit,
+    update: (IPState) -> Unit,
     check: () -> Unit
 ) {
     Row(modifier = Modifier.padding(15.dp)) {
@@ -77,7 +77,7 @@ fun CalculatorTopComponent(
                         .weight(1F)
                         .focusRequester(focusRequesters[2]),
                     value = uiState.thirdOctet,
-                    placeholder = "0",
+                    placeholder = "1",
                     check = check,
                     onValueChange = {
                             newValue ->
@@ -99,7 +99,7 @@ fun CalculatorTopComponent(
                         .weight(1F)
                         .focusRequester(focusRequesters[3]),
                     value = uiState.forthOctet,
-                    placeholder = "1",
+                    placeholder = "0",
                     check = check,
                     onValueChange = {
                             newValue ->
@@ -121,7 +121,7 @@ fun CalculatorTopComponent(
                         .weight(1F)
                         .focusRequester(focusRequesters[4]),
                     value = uiState.subnetMask,
-                    placeholder = "25",
+                    placeholder = "24",
                     check = check,
                     onValueChange = {newValue ->
                         if (newValue.length <= 2) update(uiState.copy(subnetMask = newValue))}

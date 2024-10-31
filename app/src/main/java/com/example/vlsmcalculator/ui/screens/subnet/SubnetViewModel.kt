@@ -2,39 +2,42 @@ package com.example.vlsmcalculator.ui.screens.subnet
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.vlsmcalculator.domain.model.Subnet
+import com.example.vlsmcalculator.domain.mapper.IPMapper
+import com.example.vlsmcalculator.ui.state.ResultState
 import com.example.vlsmcalculator.domain.usecase.CalculateSubnetUseCase
-import com.example.vlsmcalculator.ui.screens.state.CalculatorState
+import com.example.vlsmcalculator.ui.state.IPState
 
 class SubnetViewModel : ViewModel() {
 
     private val useCase = CalculateSubnetUseCase()
+    private val ipMapper = IPMapper()
 
-    var calculatorState = mutableStateOf(CalculatorState())
+    var ipState = mutableStateOf(IPState())
 
-    val uiState = mutableStateOf(null as Subnet?)
+    val resultState = mutableStateOf(null as ResultState?)
 
     fun clean() {
-        calculatorState.value = CalculatorState()
-        uiState.value = null
+        ipState.value = IPState()
+        resultState.value = null
     }
 
-    fun update(calculatorState: CalculatorState) {
-        this.calculatorState.value = calculatorState
+    fun update(ipState: IPState) {
+        this.ipState.value = ipState
     }
 
     fun check() {
         val octets = listOf(
-            calculatorState.value.firstOctet,
-            calculatorState.value.secondOctet,
-            calculatorState.value.thirdOctet,
-            calculatorState.value.forthOctet,
-            calculatorState.value.subnetMask
+            ipState.value.firstOctet,
+            ipState.value.secondOctet,
+            ipState.value.thirdOctet,
+            ipState.value.forthOctet,
+            ipState.value.subnetMask
         )
         if (octets.all { it.isNotEmpty() }) {
-            uiState.value = useCase.execute(calculatorState.value)
+            val ip = ipMapper.map(ipState.value)
+            resultState.value = useCase.execute(ip)
         } else {
-            uiState.value = null
+            resultState.value = null
         }
     }
 }

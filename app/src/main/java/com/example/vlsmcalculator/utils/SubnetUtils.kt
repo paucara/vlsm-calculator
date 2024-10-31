@@ -1,18 +1,16 @@
 package com.example.vlsmcalculator.utils
 
-import com.example.vlsmcalculator.domain.model.Subnet
-import com.example.vlsmcalculator.ui.screens.state.CalculatorState
+import com.example.vlsmcalculator.domain.model.IP
+import com.example.vlsmcalculator.ui.state.ResultState
 import kotlin.math.pow
 
-fun calculateSubnet(ip: CalculatorState): Subnet {
+fun calculateSubnet(ip: IP): ResultState {
 
-    val firstOctet = ip.firstOctet.toInt()
-    val secondOctet = ip.secondOctet.toInt()
-    val thirdOctet = ip.thirdOctet.toInt()
-    val forthOctet = ip.forthOctet.toInt()
-
-
-    val subnetMaskPrefix = ip.subnetMask.substringAfter("/").toInt()
+    val firstOctet = ip.firstOctet
+    val secondOctet = ip.secondOctet
+    val thirdOctet = ip.thirdOctet
+    val forthOctet = ip.forthOctet
+    val subnetMaskPrefix = ip.subnetMask
 
 
     val subnetMask = prefixToSubnetMask(subnetMaskPrefix)
@@ -34,7 +32,7 @@ fun calculateSubnet(ip: CalculatorState): Subnet {
 
     val usableHosts = calculateUsableHosts(subnetMaskPrefix)
 
-    return Subnet(
+    return ResultState(
         networkAddress = networkAddress,
         firstUsableHost = firstUsableHost,
         lastUsableHost = lastUsableHost,

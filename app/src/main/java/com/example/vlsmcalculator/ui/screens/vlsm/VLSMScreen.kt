@@ -15,71 +15,73 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.vlsmcalculator.domain.model.Network
 import com.example.vlsmcalculator.ui.components.CalculatorCard
 import com.example.vlsmcalculator.ui.components.CalculatorTopComponent
 import com.example.vlsmcalculator.ui.components.ConfigureButton
 import com.example.vlsmcalculator.ui.components.NetworkDialog
-import com.example.vlsmcalculator.ui.screens.state.CalculatorState
+import com.example.vlsmcalculator.ui.state.IPState
+import com.example.vlsmcalculator.ui.state.NetworkState
 
 @Composable
 fun VLSMScreen(viewModel: VLSMViewModel) {
-    val calculatorState = viewModel.calculatorState.value
-    val networks = viewModel.networkState.value
-    val uiState = viewModel.uiState
+    val ipState = viewModel.ipState.value
+    val networksState = viewModel.networksState.value
+    val resultState = viewModel.resultState
     Column {
         VLSMCalculator(
-            calculatorState,
-            uiState,
-            networks,
+            ipState,
+            resultState,
+            networksState,
             viewModel::clean,
             viewModel::update,
+            viewModel::check,
             viewModel::addNetwork,
             viewModel::updateNetworks,
-            viewModel::check
+            viewModel::deleteNetwork
         )
     }
 }
 
 @Composable
 fun VLSMCalculator(
-    calculatorState: CalculatorState,
-    uiState : MutableState<List<CalculatorState>>,
-    networks: List<Network>,
+    ipState: IPState,
+    resultState: MutableState<List<IPState>>,
+    networksState: List<NetworkState>,
     clean: () -> Unit,
-    update: (CalculatorState) -> Unit,
-    addNetwork : (Network) -> Unit,
+    update: (IPState) -> Unit,
+    check: () -> Unit,
+    addNetwork: (NetworkState) -> Unit,
     updateNetworks: (Int, String) -> Unit,
-    check: () -> Unit
+    deleteNetwork: (Int) -> Unit
 ) {
     val openDialog = remember { mutableStateOf(false) }
 
     CalculatorCard {
-        CalculatorTopComponent(calculatorState, clean, update, check)
+        CalculatorTopComponent(ipState, clean, update, check)
         ConfigureButton(openDialog)
         if (openDialog.value) {
             NetworkDialog(
                 onDismissRequest = { openDialog.value = false },
                 addNetwork = addNetwork,
-                networks = networks,
+                networks = networksState,
                 updateNetworks = updateNetworks,
-                check = check
+                check = check,
+                deleteNetwork = deleteNetwork
             )
         }
     }
     LazyColumn {
-        items(uiState.value){ item ->
+        items(resultState.value){ item ->
             NetworkResult(item)
         }
     }
 }
 
 @Composable
-fun NetworkResult(calculatorState: CalculatorState){
+fun NetworkResult(ipState: IPState){
 
     val value =
-        calculatorState.firstOctet + "." + calculatorState.secondOctet + "." + calculatorState.thirdOctet + "." + calculatorState.forthOctet + "/" + calculatorState.subnetMask
-
+        ipState.firstOctet + "." + ipState.secondOctet + "." + ipState.thirdOctet + "." + ipState.forthOctet  + "/" + ipState.subnetMask
 
     Card(
         modifier = Modifier

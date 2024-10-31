@@ -1,26 +1,27 @@
 package com.example.vlsmcalculator.utils
 
+import com.example.vlsmcalculator.domain.model.IP
 import com.example.vlsmcalculator.domain.model.Network
-import com.example.vlsmcalculator.ui.screens.state.CalculatorState
+import com.example.vlsmcalculator.ui.state.IPState
 import kotlin.math.pow
 
-fun calculateVLSM(ip: CalculatorState, networks: List<Network>): List<CalculatorState> {
+fun calculateVLSM(ip: IP, networks: List<Network>): List<IPState> {
     val sortedNetworks = networks.sortedByDescending { it.requestedHosts }
-    val baseIP = listOf(ip.firstOctet.toInt(), ip.secondOctet.toInt(), ip.thirdOctet.toInt(), ip.forthOctet.toInt())
+    val baseIP = listOf(ip.firstOctet, ip.secondOctet, ip.thirdOctet, ip.forthOctet)
 
     var currentIP = baseIP
-    val subnets = mutableListOf<CalculatorState>()
+    val subnets = mutableListOf<IPState>()
 
     sortedNetworks.forEach { network ->
         val requiredHosts = network.requestedHosts + 2
         val subnetPrefix = calculateSubnetPrefix(requiredHosts.toInt())
 
-        val newSubnet = CalculatorState(
+        val newSubnet = IPState(
             firstOctet = currentIP[0].toString(),
             secondOctet = currentIP[1].toString(),
             thirdOctet = currentIP[2].toString(),
             forthOctet = currentIP[3].toString(),
-            subnetMask = "/$subnetPrefix"
+            subnetMask = subnetPrefix.toString()
         )
 
         subnets.add(newSubnet)
