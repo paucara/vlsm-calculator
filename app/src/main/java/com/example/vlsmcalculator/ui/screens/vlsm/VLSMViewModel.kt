@@ -5,19 +5,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.vlsmcalculator.domain.mapper.IPMapper
 import com.example.vlsmcalculator.domain.mapper.NetworkMapper
+import com.example.vlsmcalculator.domain.usecase.CalculateSubnetUseCase
 import com.example.vlsmcalculator.domain.usecase.CalculateVLSMUseCase
 import com.example.vlsmcalculator.ui.state.IPState
 import com.example.vlsmcalculator.ui.state.NetworkState
+import com.example.vlsmcalculator.ui.state.ResultState
 
 class VLSMViewModel : ViewModel() {
 
-    private val useCase = CalculateVLSMUseCase()
+    private val calculateVLSMUseCase = CalculateVLSMUseCase()
+    private val calculateSubnetUseCase = CalculateSubnetUseCase()
+
     private val ipMapper = IPMapper()
     private val networkMapper = NetworkMapper()
 
     var ipState = mutableStateOf(IPState())
     var networksState : MutableState<List<NetworkState>> = mutableStateOf(emptyList())
-    var resultState : MutableState<List<IPState>> = mutableStateOf(emptyList())
+    var resultState : MutableState<List<ResultState>> = mutableStateOf(emptyList())
 
     fun clean() {
         ipState.value = IPState()
@@ -46,7 +50,6 @@ class VLSMViewModel : ViewModel() {
     }
 
     fun check() {
-
         val octets = listOf(
             ipState.value.firstOctet,
             ipState.value.secondOctet,
@@ -54,18 +57,19 @@ class VLSMViewModel : ViewModel() {
             ipState.value.forthOctet,
             ipState.value.subnetMask
         )
-
         val hosts = networksState.value.map { it.requestedHosts }
         val isEmpty = hosts.any { it == "" }
 
         if (octets.all { it.isNotEmpty() } && !isEmpty) {
-            resultState.value = useCase.execute(
+
+            val listIP = calculateVLSMUseCase.execute(
                 ip = ipMapper.map(ipState.value),
                 networks = networksState.value.map { networkState -> networkMapper.map(networkState) }
-            )
+            ).map { network -> ipMapper.map(network) }
+
+            resultState.value = listIP.map { ip -> calculateSubnetUseCase.execute(ip)}
         } else {
             resultState.value = emptyList()
         }
-
     }
 }

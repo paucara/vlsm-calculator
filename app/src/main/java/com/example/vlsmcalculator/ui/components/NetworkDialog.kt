@@ -85,7 +85,7 @@ fun BottomNetworkDialog(onDismissRequest: () -> Unit, addNetwork: (NetworkState)
             onClick = { onDismissRequest() },
             modifier = Modifier.padding(8.dp),
         ) {
-            Text("Dismiss")
+            Text("Done")
         }
         TextButton(
             onClick = { addNetwork(NetworkState("", "")) },
